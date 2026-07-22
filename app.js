@@ -43,21 +43,33 @@ function showToast(msg) {
 }
 
 // ---------------------------------------------------------
-// 4. AUTH
+// 4. AUTH & EVENT LISTENERS
 // ---------------------------------------------------------
-const authScreen = document.getElementById('auth-screen');
-const appScreen = document.getElementById('app-screen');
-const authForm = document.getElementById('auth-form');
-const authError = document.getElementById('auth-error');
+document.addEventListener('DOMContentLoaded', () => {
+  const authScreen = document.getElementById('auth-screen');
+  const appScreen = document.getElementById('app-screen');
+  const authForm = document.getElementById('auth-form');
+  const authError = document.getElementById('auth-error');
 
-authForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  await handleLogin();
-});
-document.getElementById('auth-signup-btn').addEventListener('click', handleSignup);
-document.getElementById('sign-out-btn').addEventListener('click', async () => {
-  await supabaseClient.auth.signOut();
-  location.reload();
+  if (authForm) {
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await handleLogin();
+    });
+  }
+
+  const signupBtn = document.getElementById('auth-signup-btn');
+  if (signupBtn) {
+    signupBtn.addEventListener('click', handleSignup);
+  }
+
+  const signOutBtn = document.getElementById('sign-out-btn');
+  if (signOutBtn) {
+    signOutBtn.addEventListener('click', async () => {
+      await supabaseClient.auth.signOut();
+      location.reload();
+    });
+  }
 });
 
 async function handleLogin() {
