@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dive Trip Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============ AUTH SCREEN ============ -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="brand-mark">
+        <span class="brand-gauge">◐</span>
+        <h1>Dive Trip Planner</h1>
+      </div>
+      <p class="auth-sub">Plan the dive, not just the trip.</p>
+
+      <form id="auth-form">
+        <label>Email
+          <input type="email" id="auth-email" required autocomplete="email">
+        </label>
+        <label>Password
+          <input type="password" id="auth-password" required autocomplete="current-password" minlength="6">
+        </label>
+        <div id="auth-error" class="auth-error" hidden></div>
+        <div class="auth-actions">
+          <button type="submit" id="auth-login-btn" class="btn btn-primary">Log in</button>
+          <button type="button" id="auth-signup-btn" class="btn btn-ghost">Create account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MAIN APP ============ -->
+  <div id="app-screen" class="app-screen" hidden>
+
+    <header class="app-header">
+      <div class="brand-mark small">
+        <span class="brand-gauge">◐</span>
+        <span>Dive Trip Planner</span>
+      </div>
+
+      <div class="trip-switcher">
+        <select id="trip-select"></select>
+        <button id="new-trip-btn" class="btn btn-icon" title="New trip">+</button>
+      </div>
+
+      <button id="sign-out-btn" class="btn btn-ghost small">Sign out</button>
+    </header>
+
+    <!-- Dive-computer style readout for the active trip -->
+    <section id="trip-readout" class="readout-panel" hidden>
+      <div class="readout-field">
+        <span class="readout-label">Trip</span>
+        <input id="readout-trip-name" class="readout-value readout-editable" />
+      </div>
+      <div class="readout-field">
+        <span class="readout-label">Destination</span>
+        <input id="readout-destination" class="readout-value readout-editable" />
+      </div>
+      <div class="readout-field">
+        <span class="readout-label">Dates</span>
+        <input type="date" id="readout-start" class="readout-value readout-editable mono" />
+        <span class="readout-sep">–</span>
+        <input type="date" id="readout-end" class="readout-value readout-editable mono" />
+      </div>
+      <div class="readout-field">
+        <span class="readout-label">Countdown</span>
+        <span id="readout-countdown" class="readout-value mono accent">—</span>
+      </div>
+    </section>
+
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="compare">Compare Destinations</button>
+      <button class="tab-btn" data-tab="shops">Dive Shops</button>
+      <button class="tab-btn" data-tab="sites">Dive Sites</button>
+      <button class="tab-btn" data-tab="flights">Flights</button>
+      <button class="tab-btn" data-tab="stays">Accommodations</button>
+      <button class="tab-btn" data-tab="gear">Gear Locker</button>
+      <button class="tab-btn" data-tab="certs">Certifications</button>
+    </nav>
+
+    <main class="tab-panels">
+
+      <!-- COMPARE DESTINATIONS -->
+      <section id="tab-compare" class="tab-panel active">
+        <div class="panel-header">
+          <h2>Compare Destinations</h2>
+          <button id="add-candidate-btn" class="btn btn-primary small">+ Add destination</button>
+        </div>
+        <p class="panel-hint">Add candidate destinations before you commit. Save coordinates and a target month to auto-pull typical water temp and conditions.</p>
+        <div id="candidate-list" class="card-list"></div>
+      </section>
+
+      <!-- DIVE SHOPS -->
+      <section id="tab-shops" class="tab-panel">
+        <div class="panel-header">
+          <h2>Dive Shops</h2>
+          <button id="add-shop-btn" class="btn btn-primary small">+ Add dive shop</button>
+        </div>
+        <div id="shop-list" class="card-list"></div>
+      </section>
+
+      <!-- DIVE SITES -->
+      <section id="tab-sites" class="tab-panel">
+        <div class="panel-header">
+          <h2>Dive Sites</h2>
+          <button id="add-site-btn" class="btn btn-primary small">+ Add dive site</button>
+        </div>
+        <div id="site-list" class="card-list"></div>
+      </section>
+
+      <!-- FLIGHTS -->
+      <section id="tab-flights" class="tab-panel">
+        <div class="panel-header">
+          <h2>Flights</h2>
+          <button id="add-flight-btn" class="btn btn-primary small">+ Add flight</button>
+        </div>
+        <div id="flight-list" class="card-list"></div>
+      </section>
+
+      <!-- ACCOMMODATIONS -->
+      <section id="tab-stays" class="tab-panel">
+        <div class="panel-header">
+          <h2>Accommodations</h2>
+          <button id="add-stay-btn" class="btn btn-primary small">+ Add stay</button>
+        </div>
+        <div id="stay-list" class="card-list"></div>
+      </section>
+
+      <!-- GEAR LOCKER -->
+      <section id="tab-gear" class="tab-panel">
+        <div class="panel-header">
+          <h2>Gear Locker</h2>
+          <span class="panel-hint inline">Personal — follows you across every trip</span>
+          <button id="add-gear-btn" class="btn btn-primary small">+ Add item</button>
+        </div>
+        <div id="gear-list" class="card-list"></div>
+      </section>
+
+      <!-- CERTIFICATIONS -->
+      <section id="tab-certs" class="tab-panel">
+        <div class="panel-header">
+          <h2>Certifications</h2>
+          <span class="panel-hint inline">Personal — your C-cards, always on hand</span>
+          <button id="add-cert-btn" class="btn btn-primary small">+ Add certification</button>
+        </div>
+        <div id="cert-list" class="card-list"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
