@@ -20,7 +20,7 @@
 const SUPABASE_URL = 'https://zpttgmpdxpzfqjopezga.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_gp07wzqDemB7J2KK4Jjd3g_dT9Yp9b-';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ---------------------------------------------------------
 // 2. STATE
@@ -56,7 +56,7 @@ authForm.addEventListener('submit', async (e) => {
 });
 document.getElementById('auth-signup-btn').addEventListener('click', handleSignup);
 document.getElementById('sign-out-btn').addEventListener('click', async () => {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
   location.reload();
 });
 
@@ -64,7 +64,7 @@ async function handleLogin() {
   authError.hidden = true;
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) { showAuthError(error.message); return; }
   currentUser = data.user;
   await enterApp();
@@ -78,7 +78,7 @@ async function handleSignup() {
     showAuthError('Enter an email and a password of at least 6 characters.');
     return;
   }
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
   if (error) { showAuthError(error.message); return; }
   if (data.user && !data.session) {
     showAuthError('Check your email to confirm your account, then log in.');
@@ -94,7 +94,7 @@ function showAuthError(msg) {
 }
 
 async function checkExistingSession() {
-  const { data } = await supabase.auth.getSession();
+  const { data } = await supabaseClient.auth.getSession();
   if (data.session) {
     currentUser = data.session.user;
     await enterApp();
@@ -191,7 +191,7 @@ function wireReadoutInputs() {
   bindings.forEach(([elId, field]) => {
     document.getElementById(elId).addEventListener('change', async (e) => {
       const patch = { [field]: e.target.value || null };
-      const { error } = await supabase.from('trips').update(patch).eq('id', currentTripId);
+      const { error } = await supabaseClient.from('trips').update(patch).eq('id', currentTripId);
       if (!error) {
         Object.assign(currentTrip(), patch);
         if (field === 'name') renderTripSelect();
@@ -294,7 +294,7 @@ function renderCardList({ containerId, rows, fieldDefs, table, titleKey, extraBa
         let value = el.type === 'checkbox' ? el.checked : el.value;
         if (value === '') value = null;
         const patch = { [key]: value };
-        const { error } = await supabase.from(table).update(patch).eq('id', id);
+        const { error } = await supabaseClient.from(table).update(patch).eq('id', id);
         if (error) { console.error(error); showToast('Save failed'); return; }
         const row = rows.find(r => r.id === id);
         if (row) Object.assign(row, patch);
@@ -304,7 +304,7 @@ function renderCardList({ containerId, rows, fieldDefs, table, titleKey, extraBa
     });
     cardEl.querySelector('.btn-delete').addEventListener('click', async () => {
       if (!confirm('Delete this entry?')) return;
-      const { error } = await supabase.from(table).delete().eq('id', id);
+      const { error } = await supabaseClient.from(table).delete().eq('id', id);
       if (error) { console.error(error); return; }
       const idx = rows.findIndex(r => r.id === id);
       if (idx >= 0) rows.splice(idx, 1);
@@ -322,7 +322,7 @@ function renderCardList({ containerId, rows, fieldDefs, table, titleKey, extraBa
       await Promise.all(ids.map((id, index) => {
         const row = rows.find(r => r.id === id);
         if (row) row.position = index;
-        return supabase.from(table).update({ position: index }).eq('id', id);
+        return supabaseClient.from(table).update({ position: index }).eq('id', id);
       }));
       rows.sort((a, b) => a.position - b.position);
     },
@@ -426,7 +426,7 @@ async function geocodeAndFetchWeather(row) {
       return;
     }
     const { latitude, longitude } = json.results[0];
-    await supabase.from('destination_candidates').update({ lat: latitude, lng: longitude }).eq('id', row.id);
+    await supabaseClient.from('destination_candidates').update({ lat: latitude, lng: longitude }).eq('id', row.id);
     row.lat = latitude;
     row.lng = longitude;
     await fetchAndCacheWeather(row);
@@ -485,7 +485,7 @@ async function fetchAndCacheWeather(row) {
       weather_is_forecast: isForecastWindow,
       weather_fetched_at: new Date().toISOString(),
     };
-    await supabase.from('destination_candidates').update(patch).eq('id', row.id);
+    await supabaseClient.from('destination_candidates').update(patch).eq('id', row.id);
     Object.assign(row, patch);
     renderCandidates();
     showToast('Conditions updated');
@@ -530,7 +530,7 @@ const shopFieldDefs = [
   { key: 'notes', label: 'Notes', type: 'textarea', full: true },
 ];
 async function loadShops() {
-  const { data, error } = await supabase.from('dive_shops').select('*').eq('trip_id', currentTripId).order('position');
+  const { data, error } = await supabaseClient.from('dive_shops').select('*').eq('trip_id', currentTripId).order('position');
   if (error) { console.error(error); return; }
   shopRows = data || [];
   renderShops();
@@ -561,7 +561,7 @@ function siteFieldDefs() {
   ];
 }
 async function loadSites() {
-  const { data, error } = await supabase.from('dive_sites').select('*').eq('trip_id', currentTripId).order('position');
+  const { data, error } = await supabaseClient.from('dive_sites').select('*').eq('trip_id', currentTripId).order('position');
   if (error) { console.error(error); return; }
   siteRows = data || [];
   renderSites();
@@ -570,7 +570,7 @@ function renderSites() {
   renderCardList({ containerId: 'site-list', rows: siteRows, fieldDefs: siteFieldDefs(), table: 'dive_sites', titleKey: 'name' });
 }
 document.getElementById('add-site-btn').addEventListener('click', async () => {
-  const { data, error } = await supabase.from('dive_sites').insert({ trip_id: currentTripId, name: 'New Dive Site', position: siteRows.length }).select().single();
+  const { data, error } = await supabaseClient.from('dive_sites').insert({ trip_id: currentTripId, name: 'New Dive Site', position: siteRows.length }).select().single();
   if (error) { console.error(error); return; }
   siteRows.push(data);
   renderSites();
@@ -589,7 +589,7 @@ const flightFieldDefs = [
   { key: 'notes', label: 'Notes', type: 'textarea', full: true },
 ];
 async function loadFlights() {
-  const { data, error } = await supabase.from('flights').select('*').eq('trip_id', currentTripId).order('position');
+  const { data, error } = await supabaseClient.from('flights').select('*').eq('trip_id', currentTripId).order('position');
   if (error) { console.error(error); return; }
   flightRows = data || [];
   renderFlights();
@@ -598,7 +598,7 @@ function renderFlights() {
   renderCardList({ containerId: 'flight-list', rows: flightRows, fieldDefs: flightFieldDefs, table: 'flights', titleKey: 'airline' });
 }
 document.getElementById('add-flight-btn').addEventListener('click', async () => {
-  const { data, error } = await supabase.from('flights').insert({ trip_id: currentTripId, airline: 'New Flight', position: flightRows.length }).select().single();
+  const { data, error } = await supabaseClient.from('flights').insert({ trip_id: currentTripId, airline: 'New Flight', position: flightRows.length }).select().single();
   if (error) { console.error(error); return; }
   flightRows.push(data);
   renderFlights();
@@ -616,7 +616,7 @@ const stayFieldDefs = [
   { key: 'notes', label: 'Notes', type: 'textarea', full: true },
 ];
 async function loadStays() {
-  const { data, error } = await supabase.from('accommodations').select('*').eq('trip_id', currentTripId).order('position');
+  const { data, error } = await supabaseClient.from('accommodations').select('*').eq('trip_id', currentTripId).order('position');
   if (error) { console.error(error); return; }
   stayRows = data || [];
   renderStays();
@@ -625,7 +625,7 @@ function renderStays() {
   renderCardList({ containerId: 'stay-list', rows: stayRows, fieldDefs: stayFieldDefs, table: 'accommodations', titleKey: 'name' });
 }
 document.getElementById('add-stay-btn').addEventListener('click', async () => {
-  const { data, error } = await supabase.from('accommodations').insert({ trip_id: currentTripId, name: 'New Stay', position: stayRows.length }).select().single();
+  const { data, error } = await supabaseClient.from('accommodations').insert({ trip_id: currentTripId, name: 'New Stay', position: stayRows.length }).select().single();
   if (error) { console.error(error); return; }
   stayRows.push(data);
   renderStays();
@@ -640,7 +640,7 @@ const gearFieldDefs = [
   { key: 'notes', label: 'Notes', type: 'textarea', full: true },
 ];
 async function loadGear() {
-  const { data, error } = await supabase.from('gear_locker').select('*').eq('user_id', currentUser.id).order('position');
+  const { data, error } = await supabaseClient.from('gear_locker').select('*').eq('user_id', currentUser.id).order('position');
   if (error) { console.error(error); return; }
   gearRows = data || [];
   renderGear();
@@ -649,7 +649,7 @@ function renderGear() {
   renderCardList({ containerId: 'gear-list', rows: gearRows, fieldDefs: gearFieldDefs, table: 'gear_locker', titleKey: 'item' });
 }
 document.getElementById('add-gear-btn').addEventListener('click', async () => {
-  const { data, error } = await supabase.from('gear_locker').insert({ user_id: currentUser.id, item: 'New Item', position: gearRows.length }).select().single();
+  const { data, error } = await supabaseClient.from('gear_locker').insert({ user_id: currentUser.id, item: 'New Item', position: gearRows.length }).select().single();
   if (error) { console.error(error); return; }
   gearRows.push(data);
   renderGear();
@@ -665,7 +665,7 @@ const certFieldDefs = [
   { key: 'issued_date', label: 'Issued', type: 'date' },
 ];
 async function loadCerts() {
-  const { data, error } = await supabase.from('certifications').select('*').eq('user_id', currentUser.id).order('position');
+  const { data, error } = await supabaseClient.from('certifications').select('*').eq('user_id', currentUser.id).order('position');
   if (error) { console.error(error); return; }
   certRows = data || [];
   renderCerts();
@@ -674,7 +674,7 @@ function renderCerts() {
   renderCardList({ containerId: 'cert-list', rows: certRows, fieldDefs: certFieldDefs, table: 'certifications', titleKey: 'agency' });
 }
 document.getElementById('add-cert-btn').addEventListener('click', async () => {
-  const { data, error } = await supabase.from('certifications').insert({ user_id: currentUser.id, agency: 'New Certification', position: certRows.length }).select().single();
+  const { data, error } = await supabaseClient.from('certifications').insert({ user_id: currentUser.id, agency: 'New Certification', position: certRows.length }).select().single();
   if (error) { console.error(error); return; }
   certRows.push(data);
   renderCerts();
