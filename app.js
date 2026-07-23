@@ -133,10 +133,7 @@ tripSelect.addEventListener('change', async () => {
 });
 
 async function loadTrips() {
-  const { data, error } = await supabase
-    .from('trips')
-    .select('*')
-    .order('created_at', { ascending: true });
+  const { data, error } = await supabaseClient.from('trips').select('*').order('created_at', { ascending: true });
   if (error) { console.error(error); return; }
   trips = data || [];
   if (trips.length === 0) {
