@@ -79,8 +79,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Helper to safely get the error element whenever needed
+function getAuthErrorEl() {
+  return document.getElementById('auth-error');
+}
+
+function clearAuthError() {
+  const el = getAuthErrorEl();
+  if (el) {
+    el.hidden = true;
+    el.textContent = '';
+  }
+}
+
+function showAuthError(msg) {
+  const el = getAuthErrorEl();
+  if (el) {
+    el.textContent = msg;
+    el.hidden = false;
+  }
+}
+
 async function handleLogin() {
-  authError.hidden = true;
+  clearAuthError();
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -90,7 +111,7 @@ async function handleLogin() {
 }
 
 async function handleSignup() {
-  authError.hidden = true;
+  clearAuthError();
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
   if (!email || password.length < 6) {
