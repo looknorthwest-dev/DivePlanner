@@ -30,6 +30,12 @@ let trips = [];
 let currentTripId = null;
 let sortableInstances = {}; // keyed by list element id, so we can destroy/recreate cleanly
 
+// Global DOM elements initialized inside DOMContentLoaded below
+let authError;
+let authScreen;
+let appScreen;
+let authForm;
+
 // ---------------------------------------------------------
 // 3. TOAST (small "Saved" confirmation, non-blocking)
 // ---------------------------------------------------------
@@ -46,10 +52,11 @@ function showToast(msg) {
 // 4. AUTH & EVENT LISTENERS
 // ---------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-  const authScreen = document.getElementById('auth-screen');
-  const appScreen = document.getElementById('app-screen');
-  const authForm = document.getElementById('auth-form');
-  const authError = document.getElementById('auth-error');
+  // Assign directly to the global variables declared in Section 2 (NO 'const' or 'let' here!)
+  authScreen = document.getElementById('auth-screen');
+  appScreen = document.getElementById('app-screen');
+  authForm = document.getElementById('auth-form');
+  authError = document.getElementById('auth-error');
 
   if (authForm) {
     authForm.addEventListener('submit', async (e) => {
