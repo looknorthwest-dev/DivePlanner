@@ -4,7 +4,7 @@
 // HOW THIS FILE FITS TOGETHER (for reference while you learn):
 //   - This file runs entirely in the visitor's browser, AFTER
 //     GitHub Pages has served index.html + this script to them.
-//   - Every "supabase.from(...)" call below is a direct network
+//   - Every "supabaseClient.from(...)" call below is a direct network
 //     request from THEIR browser to YOUR Supabase project. GitHub
 //     is not involved in that exchange at all — it only handed
 //     over the files once, at the start.
@@ -558,7 +558,7 @@ function renderShops() {
   renderCardList({ containerId: 'shop-list', rows: shopRows, fieldDefs: shopFieldDefs, table: 'dive_shops', titleKey: 'name' });
 }
 document.getElementById('add-shop-btn').addEventListener('click', async () => {
-  const { data, error } = await supabase.from('dive_shops').insert({ trip_id: currentTripId, name: 'New Dive Shop', position: shopRows.length }).select().single();
+  const { data, error } = await supabaseClient.from('dive_shops').insert({ trip_id: currentTripId, name: 'New Dive Shop', position: shopRows.length }).select().single();
   if (error) { console.error(error); return; }
   shopRows.push(data);
   renderShops();
